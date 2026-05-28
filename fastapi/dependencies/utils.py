@@ -76,6 +76,16 @@ from starlette.responses import Response
 from starlette.websockets import WebSocket
 from typing_inspection.typing_objects import is_typealiastype
 
+_IMMUTABLE_TYPES = (type(None), bool, int, float, str, bytes, tuple, frozenset)
+
+
+def _safe_default(default: Any) -> Any:
+    """Return immutable defaults directly; deepcopy only mutable ones."""
+    if isinstance(default, _IMMUTABLE_TYPES):
+        return default
+    return deepcopy(default)
+
+
 multipart_not_installed_error = (
     'Form data requires "python-multipart" to be installed. \n'
     'You can install "python-multipart" with: \n\n'
@@ -742,7 +752,7 @@ def _validate_value_with_model_field(
         if field.field_info.is_required():
             return None, [get_missing_field_error(loc=loc)]
         else:
-            return deepcopy(field.default), []
+            return _safe_default(field.default), []
     return field.validate(value, values, loc=loc)
 
 
@@ -777,7 +787,7 @@ def _get_multidict_value(
         if field.field_info.is_required():
             return
         else:
-            return deepcopy(field.default)
+            return _safe_default(field.default)
     return value
 
 
