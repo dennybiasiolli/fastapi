@@ -16,8 +16,6 @@ IMMUTABLE_DEFAULTS = {
     "float (3.14)": 3.14,
     "str ('hello')": "hello",
     "bytes (b'data')": b"data",
-    "tuple ((1, 2, 3))": (1, 2, 3),
-    "frozenset ({1, 2})": frozenset({1, 2}),
 }
 
 MUTABLE_DEFAULTS = {
@@ -26,6 +24,8 @@ MUTABLE_DEFAULTS = {
     "dict ({})": {},
     "dict ({'a': 1})": {"a": 1},
     "set ({1, 2})": {1, 2},
+    "tuple ((1, 2, 3))": (1, 2, 3),
+    "frozenset ({1, 2})": frozenset({1, 2}),
 }
 
 ITERATIONS = 100_000

@@ -76,7 +76,7 @@ from starlette.responses import Response
 from starlette.websockets import WebSocket
 from typing_inspection.typing_objects import is_typealiastype
 
-_IMMUTABLE_TYPES = (type(None), bool, int, float, str, bytes, tuple, frozenset)
+_IMMUTABLE_TYPES = (type(None), bool, int, float, str, bytes)
 
 
 def _safe_default(default: Any) -> Any:

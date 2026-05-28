@@ -26,10 +26,6 @@ from fastapi.testclient import TestClient
         "hello",
         b"",
         b"bytes",
-        (),
-        (1, 2, 3),
-        frozenset(),
-        frozenset({1, 2}),
     ],
     ids=lambda v: f"{type(v).__name__}({v!r})",
 )
@@ -59,6 +55,26 @@ def test_mutable_deepcopied(value):
     assert result is not value
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        (),
+        (1, 2, 3),
+        ([1, 2], "mixed"),
+        frozenset(),
+        frozenset({1, 2}),
+    ],
+    ids=lambda v: f"{type(v).__name__}({v!r})",
+)
+def test_containers_not_in_fast_path(value):
+    """tuple and frozenset are NOT in the immutable fast-path because they
+    can contain mutable elements. They go through deepcopy, which may or may
+    not return the same object depending on contents (Python optimizes
+    all-immutable tuples). The critical invariant: inner mutable data is safe."""
+    result = _safe_default(value)
+    assert result == value
+
+
 def test_mutable_list_mutation_safety():
     """Mutating the returned list must not affect the original."""
     original = [1, 2, 3]
@@ -81,6 +97,14 @@ def test_nested_mutable_deepcopied():
     result = _safe_default(original)
     result["items"][2]["nested"] = False
     assert original["items"][2]["nested"] is True
+
+
+def test_tuple_with_mutable_contents_deepcopied():
+    """A tuple containing mutable objects must be deepcopied to prevent inner mutation."""
+    original = ([1, 2], [3, 4])
+    result = _safe_default(original)
+    result[0].append(99)
+    assert original[0] == [1, 2]
 
 
 # --- Integration tests: optional params still resolve correctly ---
